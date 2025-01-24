@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>527</width>
+    <height>477</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="0" colspan="2">
+    <widget class="QPushButton" name="CloseWindow">
+     <property name="text">
+      <string>Закрыть</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="for_year">
+      <attribute name="title">
+       <string>Tab 1</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="for_month">
+      <attribute name="title">
+       <string>Tab 2</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QComboBox" name="months">
+           <item>
+            <property name="text">
+             <string>январь</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>февраль</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>март</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>апрель</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>май</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>июнь</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>июль</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>август</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>сентябрь</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>октябрь</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ноябрь</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>декабрь</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="airport">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
