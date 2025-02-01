@@ -22,6 +22,7 @@
 #include <QBarCategoryAxis>
 #include <QVBoxLayout>
 #include <QLineSeries>
+#include <QFuture>
 
 #define POSTGRE_DRIVER "QPSQL"
 #define DB_NAME "MyDB"
@@ -37,8 +38,8 @@ public:
     void AddDataBase();
     void DisconnectFromDataBase(QString nameDb = "");
     void getAirports(QComboBox *CB);
-    void arrival_planes(const QString &airport, const QDate &date, QTableView* TV);
-    void flight_planes(const QString &airport, const QDate &date, QTableView* TV);
+    QSqlQueryModel* arrival_planes(const QString &airport, const QDate &date, QTableView* TV);
+    QSqlQueryModel* flight_planes(const QString &airport, const QDate &date, QTableView* TV);
     QSqlError GetLastError(void);
     void ConnectToDataBase();
 

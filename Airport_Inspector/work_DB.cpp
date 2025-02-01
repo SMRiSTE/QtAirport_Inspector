@@ -82,7 +82,6 @@ void DataBase::DisconnectFromDataBase(QString nameDb)
  */
 void DataBase::getAirports(QComboBox *CB)
 {
-    dataBase->open();
     queryModel_for_airports->setQuery("SELECT airport_name->>'ru' as \"airportName\", airport_code FROM bookings.airports_data", *dataBase);
     if (queryModel_for_airports->lastError().isValid()){
           qDebug() << "Error executing query: " << queryModel_for_airports->lastError().text();
@@ -111,11 +110,10 @@ void DataBase::getAirports(QComboBox *CB)
     }
 }
 
-void DataBase::arrival_planes(const QString &airport, const QDate &date, QTableView* TV) {
+QSqlQueryModel* DataBase::arrival_planes(const QString &airport, const QDate &date, QTableView* TV) {
     QString airportCode = airports_code.value(airport);
     QString dateString = date.toString("yyyy-MM-dd");
 
-    dataBase->open();
     QSqlQuery query(*dataBase);
 
     query.prepare("SELECT flight_no, scheduled_arrival, ad.airport_name->>'ru' as Name "
@@ -128,7 +126,7 @@ void DataBase::arrival_planes(const QString &airport, const QDate &date, QTableV
 
     if (!query.exec()) {
         qDebug() << "Error executing query: " << query.lastError().text();
-        return;
+        return nullptr;
     }
 
     QSqlQueryModel *queryModel = new QSqlQueryModel();
@@ -137,24 +135,20 @@ void DataBase::arrival_planes(const QString &airport, const QDate &date, QTableV
     if (queryModel->lastError().isValid()) {
         qDebug() << "Error executing query: " << queryModel->lastError().text();
         delete queryModel;
-        return;
+        return nullptr;
     }
-
-    TV->setModel(queryModel);
 
     queryModel->setHeaderData(0, Qt::Horizontal, QObject::tr("Номер рейса"));
     queryModel->setHeaderData(1, Qt::Horizontal, QObject::tr("Время вылета"));
     queryModel->setHeaderData(2, Qt::Horizontal, QObject::tr("Аэропорт отправления"));
 
-    TV->horizontalHeader()->setStretchLastSection(true);
-    TV->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    return queryModel;
 }
 
-void DataBase::flight_planes(const QString &airport, const QDate &date, QTableView *TV){
+QSqlQueryModel* DataBase::flight_planes(const QString &airport, const QDate &date, QTableView *TV){
     QString airportCode = airports_code.value(airport);
     QString dateString = date.toString("yyyy-MM-dd");
 
-    dataBase->open();
     QSqlQuery query(*dataBase);
 
     query.prepare("SELECT flight_no, scheduled_departure, ad.airport_name->>'ru' as Name "
@@ -167,7 +161,7 @@ void DataBase::flight_planes(const QString &airport, const QDate &date, QTableVi
 
     if (!query.exec()) {
         qDebug() << "Error executing query: " << query.lastError().text();
-        return;
+        return nullptr;
     }
 
     QSqlQueryModel *queryModel = new QSqlQueryModel();
@@ -176,23 +170,19 @@ void DataBase::flight_planes(const QString &airport, const QDate &date, QTableVi
     if (queryModel->lastError().isValid()) {
         qDebug() << "Error executing query: " << queryModel->lastError().text();
         delete queryModel;
-        return;
+        return nullptr;
     }
-
-    TV->setModel(queryModel);
 
     queryModel->setHeaderData(0, Qt::Horizontal, QObject::tr("Номер рейса"));
     queryModel->setHeaderData(1, Qt::Horizontal, QObject::tr("Время вылета"));
     queryModel->setHeaderData(2, Qt::Horizontal, QObject::tr("Аэропорт отправления"));
 
-    TV->horizontalHeader()->setStretchLastSection(true);
-    TV->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    return queryModel;
 }
 
 void DataBase::info_per_year(const QString &airport){
     QString airportCode = airports_code.value(airport);
 
-    dataBase->open();
     QSqlQuery query(*dataBase);
     query.prepare(R"(
         SELECT
@@ -240,7 +230,6 @@ void DataBase::info_per_month(const QString &airport, int index) {
     }
     int month = index + 1;
 
-    dataBase->open();
     QSqlQuery query(*dataBase);
 
     // Подготовка запроса с явным указанием всех параметров

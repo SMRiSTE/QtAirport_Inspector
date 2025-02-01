@@ -43,14 +43,48 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(ui->get_result_btn, &QPushButton::clicked, [&](){
-        if(ui->arrival_btn->isChecked()){
-            auto arr_planes = [&]{DB->arrival_planes(ui->combo_airports->currentText(), ui->dateEdit->date(), ui->tableView);};
-            QtConcurrent::run(arr_planes);
+        if(ui->arrival_btn->isChecked()) {
+            auto arr_planes = [this]() {
+                return DB->arrival_planes(ui->combo_airports->currentText(), ui->dateEdit->date(), ui->tableView);
+            };
+
+            QFuture<QSqlQueryModel*> future = QtConcurrent::run(arr_planes);
+            QFutureWatcher<QSqlQueryModel*> *watcher = new QFutureWatcher<QSqlQueryModel*>(this);
+
+            connect(watcher, &QFutureWatcher<QSqlQueryModel*>::finished, [=]() {
+                auto queryModel = future.result();
+                if (queryModel) {
+                    ui->tableView->setModel(queryModel);
+                } else {
+                    qDebug() << "Не удалось получить данные для рейсов.";
+                }
+                watcher->deleteLater();
+            });
+
+            watcher->setFuture(future);
         }
         else if(ui->flight_btn->isChecked()){
-            auto flight_planes = [&]{DB->flight_planes(ui->combo_airports->currentText(), ui->dateEdit->date(), ui->tableView);};
-            QtConcurrent::run(flight_planes);
+            auto flight_planes = [this](){
+                return DB->flight_planes(ui->combo_airports->currentText(), ui->dateEdit->date(), ui->tableView);
+            };
+
+            QFuture<QSqlQueryModel*> future = QtConcurrent::run(flight_planes);
+            QFutureWatcher<QSqlQueryModel*> *watcher = new QFutureWatcher<QSqlQueryModel*>(this);
+
+            connect(watcher, &QFutureWatcher<QSqlQueryModel*>::finished, [=]() {
+                auto queryModel = future.result();
+                if (queryModel) {
+                    ui->tableView->setModel(queryModel);
+                } else {
+                    qDebug() << "Не удалось получить данные для рейсов.";
+                }
+                watcher->deleteLater();
+            });
+
+            watcher->setFuture(future);
         }
+        ui->tableView->horizontalHeader()->setStretchLastSection(true);
+        ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     });
 
     connect(ui->workload_btn, &QPushButton::clicked, this, [&]{
