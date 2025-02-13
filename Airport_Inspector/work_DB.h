@@ -45,14 +45,14 @@ public:
 
 public slots:
     void info_per_year(const QString &airport);
-    void info_per_month(const QString &airport, int index);
+    void info_per_month(const QString &airport, int index, int num);
 
 signals:
 
    void sig_SendDataFromDB(QAbstractItemModel *model, int typeR);
    void sig_SendStatusConnection(bool);
    void sig_readyYearGraf(const QVector<int>& counts, const QStringList& months);
-   void sig_readyMonthGraf(const QVector<int>& counts, const QStringList& months);
+   void sig_readyMonthGraf(const QVector<int>& counts, const QStringList& months, const QString &startDay, const QString &finishDay);
 
 
 private:
@@ -60,6 +60,8 @@ private:
     QSqlDatabase* dataBase;
     QSqlQueryModel* queryModel_for_airports;
     QMap<QString, QString> airports_code;
+    QVector<int> counts;
+    QStringList days;
     QVector<QString> dates;
     QSqlTableModel* tableModel;
     QTableView* tv;

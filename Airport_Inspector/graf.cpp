@@ -29,6 +29,7 @@ Dialog::Dialog(QWidget *parent) :
     });
 
     connect(DB, DataBase::sig_readyYearGraf, this, &Dialog::fill_YearChart);
+    connect(DB, DataBase::sig_readyMonthGraf, this, &Dialog::fill_MonthChart);
     connect(ui->months, QComboBox::currentIndexChanged, this, [&]{
         emit changed_month();
     });
@@ -78,64 +79,81 @@ void Dialog::fill_YearChart(const QVector<int>& counts, const QStringList& month
 
 }
 
-void Dialog::fill_MonthChart(const QVector<int> &counts, const QStringList &days){
+void Dialog::fill_MonthChart(const QVector<int> &counts, const QStringList &days, const QString& startDay, const QString& finishDay) {
+    qDebug() << "SM = " << startDay << " FM = " << finishDay;
+
     if (counts.isEmpty()) {
-            qDebug() << "No YearData to display";
-            return;
-        }
-    else{
-        qDebug() << "Ok";
+        qDebug() << "No YearData to display";
+        return;
     }
-    if (layout2->count() > 0) {
-        QLayoutItem *item;
-        while ((item = layout2->takeAt(0))) {
-            delete item->widget();
-            delete item;
-        }
+
+    // Очистка предыдущих элементов графика
+    while (layout2->count() > 0) {
+        QLayoutItem *item = layout2->takeAt(0);
+        delete item->widget();
+        delete item;
     }
 
     QLineSeries *series = new QLineSeries();
-    for(int i = 0; i < days.size(); i++){
-        series->append(i, counts[i]);
-    }
+    int num_start = -1; // Инициализируем как -1 чтобы обрабатывать ошибки
+    int num_finish = -1;
 
-    QChart *chart = new QChart();
-        chart->addSeries(series);
-
-    QCategoryAxis *axisX = new QCategoryAxis(); // Используем QCategoryAxis для текстовых меток
-    QValueAxis *axisY = new QValueAxis();
-
-    axisY->setTitleText("Flight Count");
-    axisY->setRange(0, *std::max_element(counts.begin(), counts.end()) + 1); // Максимум + 1 для лучшего отображения
-
-    // Установка оси по Y
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    QStringList list;
-    for(int i = 0; i < days.size(); i++) {
-        QString str = QString::number(i);
-        list.append(str);
-    }
-
+    // Находим индексы для начала и конца
     for (int i = 0; i < days.size(); i++) {
-        QString day = days.at(i).split('-').last();
-        axisX->append(day, i);
+        if (days[i] == startDay) {
+            num_start = i;
+        }
+        if (days[i] == finishDay) {
+            num_finish = i; // Обновляем только когда нашли finishDay
+        }
+    }
+    qDebug() << "OK!";
+
+    // Проверка на корректные индексы
+    if (num_start == -1) {
+        qDebug() << "Start day not found;";
+        return;
+    }
+    if (num_finish == -1) {
+        qDebug() << "Finish day not found;";
+        return; // Корректируем, чтобы не продолжать работу при ошибке
     }
 
-    // Установка диапазона по X
-    axisX->setRange(0, days.size() - 1);
+    // Добавляем данные в серию
+    for (int i = num_start; i <= num_finish; i++) {
+        series->append(i, counts.at(i));
+    }
 
-    // Установка заголовка оси X
+    QChart *chart = new QChart(); // Создаем новый график
+
+    // Настройка осей
+    QValueAxis *axisY = new QValueAxis();
+    axisY->setTitleText("Flight Count");
+    axisY->setRange(0, *std::max_element(counts.begin(), counts.end()) + 1); // Установка диапазона по Y
+
+    QCategoryAxis *axisX = new QCategoryAxis();
     axisX->setTitleText("Days");
+    axisX->setRange(num_start, num_finish); // Устанавливаем диапазон по X
 
-    // Установка оси по X на график
+    for (int i = num_start; i <= num_finish; i++) { // Присоединяем ось X
+        QString dayLabel = days.at(i).split('-').last();
+        axisX->append(dayLabel, i); // Добавляем метки для X оси
+    }
+
+    // Добавляем серию и оси в график
+    chart->addSeries(series);
+    chart->addAxis(axisY, Qt::AlignLeft);
     chart->addAxis(axisX, Qt::AlignBottom);
+
+    // Присоединяем оси к серии
+    series->attachAxis(axisY);
     series->attachAxis(axisX);
 
     QChartView *chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
     layout2->addWidget(chartView);
+
+    chart->update(); // Обновляем график
 }
 
 Dialog::ret_index(){

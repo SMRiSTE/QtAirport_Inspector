@@ -98,14 +98,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->workload_btn, &QPushButton::clicked, this, [&]{
         auto info_per_year = [&]{DB->info_per_year(ui->combo_airports->currentText());
-        DB->info_per_month(ui->combo_airports->currentText(), graf->ret_index());};
+        DB->info_per_month(ui->combo_airports->currentText(), graf->ret_index(), 0);};
         QtConcurrent::run(info_per_year);
     });
 
     connect(DB, DataBase::sig_readyYearGraf, graf, &Dialog::fill_YearChart);
     connect(DB, DataBase::sig_readyMonthGraf, graf, &Dialog::fill_MonthChart);
     connect(graf, Dialog::changed_month, this, [&]{
-        auto info = [&]{DB->info_per_month(ui->combo_airports->currentText(), graf->ret_index());};
+        auto info = [&]{DB->info_per_month(ui->combo_airports->currentText(), graf->ret_index(), 1);};
         QtConcurrent::run(info);
     });
 }

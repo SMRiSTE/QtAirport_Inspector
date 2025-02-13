@@ -22,7 +22,7 @@ public:
 
 public slots:
     void fill_YearChart(const QVector<int>& counts, const QStringList& months);
-    void fill_MonthChart(const QVector<int>& counts, const QStringList& days);
+    void fill_MonthChart(const QVector<int>& counts, const QStringList& days, const QString& startDay, const QString& finishDay);
 
 signals:
     void sig_open_DialogWindow(QString airport);

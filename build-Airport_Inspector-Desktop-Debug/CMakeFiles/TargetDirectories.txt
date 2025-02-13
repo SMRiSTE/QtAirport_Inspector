@@ -1,0 +1,5 @@
+D:/NETO QT/Airport_Inspector/build-Airport_Inspector-Desktop-Debug/CMakeFiles/Airport_Inspector.dir
+D:/NETO QT/Airport_Inspector/build-Airport_Inspector-Desktop-Debug/CMakeFiles/edit_cache.dir
+D:/NETO QT/Airport_Inspector/build-Airport_Inspector-Desktop-Debug/CMakeFiles/rebuild_cache.dir
+D:/NETO QT/Airport_Inspector/build-Airport_Inspector-Desktop-Debug/CMakeFiles/Airport_Inspector_autogen_timestamp_deps.dir
+D:/NETO QT/Airport_Inspector/build-Airport_Inspector-Desktop-Debug/CMakeFiles/Airport_Inspector_autogen.dir

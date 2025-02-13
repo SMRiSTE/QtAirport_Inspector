@@ -22,7 +22,6 @@ DataBase::DataBase(QObject *parent)
     dates.push_back("2016-10-01");
     dates.push_back("2016-11-01");
     dates.push_back("2016-12-01");
-    dates.push_back("2017-09-01");
 
 }
 DataBase::~DataBase()
@@ -219,7 +218,7 @@ void DataBase::info_per_year(const QString &airport){
     qDebug() << "YearSignal emitted with counts:" << counts << "and months:" << months;
 }
 
-void DataBase::info_per_month(const QString &airport, int index) {
+void DataBase::info_per_month(const QString &airport, int index, int num) {
     QString airportCode = airports_code.value(airport);
 
     int year;
@@ -228,44 +227,49 @@ void DataBase::info_per_month(const QString &airport, int index) {
     } else {
         year = 2016;
     }
-    int month = index + 1;
 
-    QSqlQuery query(*dataBase);
+    if(num == 0){
+        counts.clear();
+        days.clear();
 
-    // Подготовка запроса с явным указанием всех параметров
-    query.prepare("SELECT COUNT(flight_no) AS flight_count, "
-                  "DATE_TRUNC('day', scheduled_departure) AS \"Day\" "
-                  "FROM bookings.flights f "
-                  "WHERE scheduled_departure::date >= DATE(:year || '-' || LPAD(:month::text, 2, '0') || '-01') "
-                  "AND scheduled_departure::date < DATE(:year || '-' || LPAD(:month::text, 2, '0') || '-01') + INTERVAL '1 month' "
-                  "AND (departure_airport = :airport OR arrival_airport = :airport) "
-                  "GROUP BY \"Day\" ORDER BY \"Day\"");
+        QSqlQuery query(*dataBase);
 
-    // Привязка параметров
-    query.bindValue(":year", year);
-    query.bindValue(":month", month);
-    query.bindValue(":airport", airportCode);
+        // Подготовка запроса с явным указанием всех параметров
+        query.prepare("SELECT COUNT(flight_no) AS flight_count, "
+                      "DATE_TRUNC('day', scheduled_departure) AS \"Day\" "
+                      "FROM bookings.flights f "
+                      "WHERE scheduled_departure::date > DATE('2016-08-31') "
+                      "AND scheduled_departure::date <= DATE('2017-09-01') "
+                      "AND (departure_airport = :airport OR arrival_airport = :airport) "
+                      "GROUP BY \"Day\" ORDER BY \"Day\"");
 
-    QVector<int> counts;
-    QStringList days;
+        // Привязка параметров
+        query.bindValue(":airport", airportCode);
 
-    // Исполняем запрос
-    if (!query.exec()) {
-        qDebug() << "Error executing query: " << query.lastError().text();
-        return;
+        // Исполняем запрос
+        if (!query.exec()) {
+            qDebug() << "Error executing query: " << query.lastError().text();
+            return;
+        }
+
+        // Получение результатов запроса
+        while (query.next()) {
+            int count = query.value(0).toInt(); // Получаем количество рейсов
+            QDate dayDate = query.value(1).toDate(); // Получаем дату как QDate
+            QString day = dayDate.toString("yyyy-MM-dd"); // Получаем дату
+            counts.append(count);
+            days.append(day); // Добавляем день в QStringList
+        }
     }
 
-    // Получение результатов запроса
-    while (query.next()) {
-        int count = query.value(0).toInt(); // Получаем количество рейсов
-        QString day = query.value(1).toString(); // Получаем дату
-        counts.append(count);
-        days.append(day); // Добавляем день в QStringList
-    }
+    QDate startMonth = QDate::fromString(dates[index], "yyyy-MM-dd");
+    QDate finishMonth = startMonth.addMonths(1);
+    QString SD = startMonth.toString("yyyy-MM-dd");
+    QString FD = finishMonth.toString("yyyy-MM-dd");
 
     qDebug() << "MonthCount:" << counts.size();
-    emit sig_readyMonthGraf(counts, days); // Эмитируем сигнал с полученной информацией
-    qDebug() << "MonthSignal emitted with counts:" << counts << "and days:" << days;
+    emit sig_readyMonthGraf(counts, days, SD, FD); // Эмитируем сигнал с полученной информацией
+    qDebug() << "MonthSignal emitted with counts:" << counts << "and days:" << days << "and SM" << SD << "FM" << FD;
 }
 
 QSqlError DataBase::GetLastError()
